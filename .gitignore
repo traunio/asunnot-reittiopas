@@ -1,0 +1,5 @@
+# Notebooks checkpoints
+.ipynb_checkpoints/*
+
+# all backup files by emacs
+*~
