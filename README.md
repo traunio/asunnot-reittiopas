@@ -25,7 +25,7 @@ Initial version was made with iPython notebook and is still available in misc-su
 
 The most challenging part in this project has been learning the graphQL API provided by Digitransit and learning in what kind of form the data comes. Trying javascript and Chart.js for the first times were easier.
 
-The css style is copied directly 
+The css style is copied directly from flask tutorial.
 
 
 [screenshot]: misc/Pic_2016_11_22.png "Screenshot of example results" 
