@@ -2,6 +2,7 @@ from flask import Flask, request, session, g, redirect, url_for, \
     abort, render_template, flash, jsonify
 
 import backend
+import sys
 
 #configuration
 DEBUG = True
@@ -16,12 +17,29 @@ def index():
 
 @app.route('/data', methods=['POST'])
 def data():
-    startloc = request.form['asunto']
-    poi = request.form['poi']
-    startcoord = backend.getLocation(startloc)
-    poicoord = backend.getLocation(poi)
+    try:
+        startloc = request.form['asunto']
+        poi = request.form['poi']
+        day = request.form['combo']
+        startcoord = backend.getLocation(startloc)
+        poicoord = backend.getLocation(poi)
+    except:
+        print("Something went wrong")
+        print(sys.exc_info()[0])
+        return jsonify({'error':'Something went wrong in day'})
 
-    print('Finding connections from "%s" to "%s"' % (startloc, poi))
+    if day == 'Monday':
+        d = 1
+    elif day == 'Wednesday':
+        d = 3
+    elif day == 'Saturday':
+        d = 6
+    elif day == 'Sunday':
+        d = 7
+    else:
+        d = 1
+    
+    print('Finding connections from "%s" to "%s" on %s' % (startloc, poi, day))
 
     if len(startcoord) == 0:        
         print("Ups, can't find even similar location for \"%s\"" % startloc)
@@ -30,9 +48,15 @@ def data():
         print("Ups, can't find even similar location for \"%s\"" % poiloc)
         return jsonify({'error':"Ups, can't find  location \"%s\"" % poiloc})
 
-    results = backend.tellResults(startcoord,poicoord)
+    try:
+        results = backend.tellResults(startcoord,poicoord, d)
+    except:
+        print("Something went wrong")
+        print(sys.exc_info()[0])
+        return jsonify({'error':'Something went wrong, sorry'})
 
-    backend.pprint.pprint(jsonify(results))
+    if DEBUG:
+        backend.pprint.pprint(jsonify(results))
 
     return jsonify(results)
 

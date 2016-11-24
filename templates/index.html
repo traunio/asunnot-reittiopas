@@ -1,66 +1,76 @@
 {% extends "layout.html" %}
 {% block body %}
-      <dl>
-        <dt>Address of new flat:
-        <dd><input type=text name=asunto id="asunto">
-        <dt>Find connections to following location:
-        <dd><input type="text" name=poi id="poi">
-        <dd><input type="button" id="button" value="Give connections">
-      </dl>
-      <input type=text list=browsers >
-      <datalist id=browsers >
-	<option> Google
-	<option> IE9
-      </datalist>
-      <canvas id="myChart" height="200"></canvas>
-      <script>
-       $("#myChart").hide();
-       $(document).ready(function() {
+<dl>
+    <dt>Address of new flat:
+        <dd><input type="text" name="asunto" id="asunto">
+            <dt>Find connections to following location:
+		<dd><input type="text" name="poi" id="poi">
+		    <dd><input type="button" id="button" value="Give connections"> on
+			<select id="combobox">
+			    <option value="Monday">Monday</option>
+			    <option value="Saturday">Saturday</option>
+			    <option value="Sunday">Sunday</option>
+			</select>
+</dl>
+<div id="loading">
+    <p>Please wait, loading connections <img src="{{ url_for('static', filename='ajax-loader.gif') }}" /></p>
+</div>
+<canvas id="myChart" height="200px"></canvas>
+<div id="route"></div>
+<script>
+ $("#myChart").hide();
+ $("#loading").hide();
+ $(document).ready(function() {
 
-	   var ctx = document.getElementById("myChart");
-	   var myChart = new Chart(ctx, {
-	       type: 'bar',
-	       data: {},
-	       options: {
-		   scales: {
-		       xAxes: [{
-			   stacked: true,
-			   scaleLabel: {
-			       display: true,
-			       labelString: 'Time of day'}
-		       }],
-		       yAxes: [{
-			   stacked: true,
-			   ticks: { beginAtZero:true   },
-			   scaleLabel: {
-			       display: true,
-			       labelString: 'Number of departures' }
-		       }]
-		   }
-	       }
-	   });
+     var ctx = document.getElementById("myChart");
+     var myChart = new Chart(ctx, {
+	 type: 'bar',
+	 data: {},
+	 options: {
+	     scales: {
+		 xAxes: [{
+		     stacked: true,
+		     scaleLabel: {
+			 display: true,
+			 labelString: 'Time of day'}
+		 }],
+		 yAxes: [{
+		     stacked: true,
+		     ticks: { beginAtZero:true   },
+		     scaleLabel: {
+			 display: true,
+			 labelString: 'Number of departures per hour' }
+		 }]
+	     }
+	 }
+     });
 
-	   $("#button").click(function (){
-	       $.post("/data", {
-		   asunto: $("#asunto").val(),
-		   poi: $("#poi").val()
-	       }, function(data) {
-		   if (data.error) {
-		       $("#myChart").hide();
-		       alert(data.error);
-		   } 
-		   else {		       		   
-		       $("#myChart").show();
-		   
-		       myChart.data.datasets = data.datasets;
-		       myChart.data.labels = data.labels;
-		       myChart.update();
-		   }    
-	       });
-	   });
-       });
+     $("#button").click(function (){
+	 $("#loading").show();
+	 $.post("/data", {
+	     asunto: $("#asunto").val(),
+	     poi: $("#poi").val(),
+	     combo: $("#combobox").val()       
+	 }, function(data) {
+	     $("#loading").hide();
+	     if (data.error) {
+		 $("#myChart").hide();
+		 alert(data.error);
+	     } 
+	     else {		       		   
+		 $("#myChart").show();
 
-      </script>
+		 $("#route").html(data.route);
+		 
+		 myChart.data.datasets = data.datasets;
+		 myChart.data.labels = data.labels;
+		 myChart.update();
+	     }    
+	 });
+     });
+ });
+
+</script>
 
 
 

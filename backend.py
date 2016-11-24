@@ -106,15 +106,16 @@ def getLocation(address):
     data = requests.get(payload)
     json_reply = data.json()
     try:
-        results = {}
+        results = []
         for i in json_reply['features']:
             coord = i['geometry']['coordinates']
             place = i['properties']['label']
+            confidence = i['properties']['confidence']
             ok_cities = ["Espoo", "Helsinki", "Kauniainen", "Vantaa", "Kirkkonummi"]
             # print("Debug: %s and coords %s" % (place,coord)) 
             for city in ok_cities:
                 if city in place:
-                    results[place] = (coord[1],coord[0])
+                    results.append( (confidence, place, coord[1],coord[0]))
                     break
 
         return results
@@ -140,37 +141,6 @@ def getStreetName(coords):
 # input is the results from runRouteQ
 def analyseRouteQ(reslist):        
     
-    firstlist = [(x['startTime'],x['startTime']+x['duration']*1000) for x in reslist]
-        
-    # here we try to find routes, which leave later and arrive sooner. If we find such, return False
-    noBetterRoutes = lambda x: False if [y for y in firstlist if x[1] >= y[1]\
-                                     and x[0] < y[0] ] else True
-
-    # lambda function check that there are no faster routes
-    filteredlist = [x for x in firstlist if noBetterRoutes(x)]       
-
-    try:
-        startTimes = [x[0] for x in filteredlist]
-        firstStart = min(startTimes)
-        lastStart = max(startTimes)
-        times = (len(filteredlist)-1)/((lastStart - firstStart)/3600000)
-        #   pprint.pprint("Average times %.1f in an hour" % times)
-
-    except:
-        pprint.pprint("Something went wrong")
-        pprint.pprint(firstlist)
-        pprint.pprint(filteredlist)
-
-    durations = [(x[1]-x[0])/1000 for x in filteredlist] 
-
-    ave_dure = st.median(durations)/60
-    max_dure = max(durations)/60
-    min_dure = min(durations)/60
-
-    #pprint.pprint("Median duration %.1f mins" % ave_dure)
-    #pprint.pprint("Max duration %.1f mins" % max_dure)
-    #pprint.pprint("Min duration %.1f mins" % min_dure)
-
     singleroutes = {}
     longerroutes = {}
     walkDistance = 0
@@ -208,7 +178,7 @@ def analyseRouteQ(reslist):
             if not shortNames in longerroutes.keys():
                 longerroutes[shortNames] = route                    
 
-    return (durations,singleroutes,longerroutes)
+    return (singleroutes,longerroutes)
 
 
 # we take a singleroute, and check for stop data
@@ -238,7 +208,7 @@ def analyseMulti(name, legs,weekday=1):
     days = [today + timedelta(days=x) for x in range(1,8)]
     days = {x.isoweekday():x.strftime("%Y%m%d") for x in days}  
 
-    datte = days[1]
+    datte = days[weekday]
 
     legs = legs['legs']
     if legs[0]['mode'] == 'WALK':
@@ -320,7 +290,7 @@ def styleLegendText(x,times):
         return '%s, duration: %.0f-%.0f min; median: %.0f min' % \
                (x, min(times)/60, max(times)/60, st.median(times)/60)
     else:
-        return '%s, duration:%.0f min' % (x, min(times)/60)
+        return '%s, duration: %.0f min' % (x, min(times)/60)
 
 
 def makeResults(alltrips):
@@ -358,36 +328,46 @@ def makeResults(alltrips):
 
         
 # create dictionary to use with jsonify
-def styleChartjs(data):
+def styleChartjs(data, route):
 
     labels = ['%s-%s' % (x,x+1) for x in range(28)]
     datasets = [{'label':label, 'data':line[0], 'backgroundColor':c, \
                  'borderColor':b, 'borderWidth':1} for line,label,c,b in data]
 
-    return {'labels':labels, 'datasets':datasets} 
+    return {'labels':labels, 'datasets':datasets, 'route':route} 
 
 
 # simple helper function to do the magic
-def tellResults(startcoord, poicoord):
+def tellResults(startcoord, poicoord, weekday=1):
+    
     today = date.today()
     days = [today + timedelta(days=x) for x in range(1,8)]
     days = {x.isoweekday():x.strftime("%Y-%m-%d") for x in days}
     time = "07:30:00"
-    datte = days[1] #1 is for Monday
+    datte = days[weekday] #1 is for Monday
 
-    start = list(startcoord.values())[0]
-    poi = list(poicoord.values())[0]
-    
+    # check for value with highest confidence (confidence, place, coord, coord2)
+
+    startlist = sorted(startcoord, key=lambda c: c[0])
+    poilist = sorted(poicoord, key=lambda c: c[0])
+    start = startlist[-1][2:]
+    poi = poilist[-1][2:]
+
+    route = '<p>Results from "%s" to "%s"</p>' % (startlist[-1][1], poilist[-1][1])
+    pprint.pprint(route)
+    pprint.pprint(startlist)
+    pprint.pprint(poilist)
+
     payload = ROUTEQ % (start[0],start[1],poi[0],poi[1],datte,time)
 
     # (durations,singleroutes,longerroutes)
     result = runQuery(payload)['data']['plan']['itineraries'] 
-    (dure,singles,longer) = analyseRouteQ(result)
+    (singles,longer) = analyseRouteQ(result)
     
-    alltimes = [analyseSingle(k,v) for k,v in singles.items()]
-    alltimes.extend([analyseMulti(k,v) for k,v in longer.items()])
+    alltimes = [analyseSingle(k,v,weekday) for k,v in singles.items()]
+    alltimes.extend([analyseMulti(k,v,weekday) for k,v in longer.items()])
             
     outcome = makeResults(alltimes)
-    results = styleChartjs(outcome)
+    results = styleChartjs(outcome, route)
     
     return results
