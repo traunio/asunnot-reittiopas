@@ -82,8 +82,6 @@ COLORS = [[166, 206, 227], [43, 128, 184], [150, 203, 145], [81, 175, 66], [184,
           [237, 80, 81], [240, 112, 71], [253, 163, 63], [237, 144, 71], [174, 144, 197],\
           [134, 97, 153]]
 
-
-
 def runQuery(payload):
     req = requests.Request('POST', "https://api.digitransit.fi/" \
                            "routing/v1/routers/hsl/index/graphql", data=payload)
