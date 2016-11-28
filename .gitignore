@@ -1,5 +1,6 @@
 # Notebooks checkpoints
 .ipynb_checkpoints/*
+misc/.ipynb_checkpoints/*
 
 # all backup files by emacs
 *~
@@ -7,7 +8,7 @@
 .#
 
 # Python cache
-__pycache
+__pycache__
 
 # virtual environment
 venv
