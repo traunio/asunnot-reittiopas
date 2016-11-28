@@ -1,1 +1,1 @@
-web: gunicorn asuntosaitti:index
+web: gunicorn asuntosaitti:app

@@ -5,8 +5,6 @@ import pprint
 from datetime import date, timedelta
 import statistics as st
 import itertools as it
-import matplotlib.cm as cm
-
 
 #payload, date and time to be included
 #date format: "2016-05-20",
@@ -78,6 +76,13 @@ STOPQ = """
     }
   } 
 }"""
+
+
+COLORS = [[166, 206, 227], [43, 128, 184], [150, 203, 145], [81, 175, 66], [184, 156, 116],\
+          [237, 80, 81], [240, 112, 71], [253, 163, 63], [237, 144, 71], [174, 144, 197],\
+          [134, 97, 153]]
+
+
 
 def runQuery(payload):
     req = requests.Request('POST', "https://api.digitransit.fi/" \
@@ -320,9 +325,9 @@ def makeResults(alltrips):
     cborders = []
 
     for i, items in enumerate(startsAll2):
-        c = cm.jet(i/len(startsAll2),0.8)
-        colors.append('rgba(%i, %i, %i, 0.7)' % (c[0]*255, c[1]*255, c[2]*255))
-        cborders.append('rgba(%i, %i, %i, 0.9)' % (c[0]*255, c[1]*255, c[2]*255))
+        c = COLORS[i]
+        colors.append('rgba(%i, %i, %i, 0.7)' % (c[0], c[1], c[2]))
+        cborders.append('rgba(%i, %i, %i, 0.9)' %  (c[0], c[1], c[2]))
 
     return zip(startsAll2, durations, colors, cborders)
 

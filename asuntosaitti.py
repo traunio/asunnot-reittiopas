@@ -3,9 +3,10 @@ from flask import Flask, request, session, g, redirect, url_for, \
 
 import backend
 import sys
+import os
 
-#configuration
-DEBUG = True
+#configuration. Set Tru for local testing :)
+DEBUG = False
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -62,4 +63,5 @@ def data():
 
 
 if __name__ == '__main__':
-    app.run()
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)

@@ -3,3 +3,11 @@
 
 # all backup files by emacs
 *~
+#
+.#
+
+# Python cache
+__pycache
+
+# virtual environment
+venv
