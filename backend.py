@@ -356,10 +356,8 @@ def tellResults(startcoord, poicoord, weekday=1):
     start = startlist[-1][2:]
     poi = poilist[-1][2:]
 
-    route = '<p>Results from "%s" to "%s"</p>' % (startlist[-1][1], poilist[-1][1])
-    pprint.pprint(route)
-    pprint.pprint(startlist)
-    pprint.pprint(poilist)
+    route = '<p>Results from "%s" to "%s" on %s.</p>' % (startlist[-1][1], poilist[-1][1], datte)
+    pprint.pprint(route[3:-4])
 
     payload = ROUTEQ % (start[0],start[1],poi[0],poi[1],datte,time)
 

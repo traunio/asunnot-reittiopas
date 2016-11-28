@@ -5,7 +5,7 @@ import backend
 import sys
 import os
 
-#configuration. Set Tru for local testing :)
+#configuration. Set True for local testing :)
 DEBUG = False
 
 app = Flask(__name__)
@@ -63,5 +63,8 @@ def data():
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    if DEBUG:
+        app.run()
+    else:
+        port = int(os.environ.get('PORT', 5000))
+        app.run(host='0.0.0.0', port=port)
