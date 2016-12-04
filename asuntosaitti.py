@@ -5,8 +5,10 @@ import backend
 import sys
 import os
 
+import traceback
+
 #configuration. Set True for local testing :)
-DEBUG = False
+DEBUG = True
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -27,6 +29,7 @@ def data():
     except:
         print("Something went wrong")
         print(sys.exc_info()[0])
+        traceback.print_exc()
         return jsonify({'error':'Something went wrong in day'})
 
     if day == 'Monday':
@@ -54,6 +57,7 @@ def data():
     except:
         print("Something went wrong")
         print(sys.exc_info()[0])
+        traceback.print_exc()
         return jsonify({'error':'Something went wrong, sorry'})
 
     if DEBUG:

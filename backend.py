@@ -49,12 +49,13 @@ WALKQ = """
   plan(from: {lat: %s, lon: %s}, 
        to: {lat: %s, lon: %s},
        modes: "WALK",
+       walkSpeed: 1.2,
+       numItineraries: 1
        ) {
    itineraries{
-      startTime
       walkDistance
-      duration       
-    }
+      duration      
+<    }
   }  
 }"""  
 
@@ -77,7 +78,7 @@ STOPQ = """
   } 
 }"""
 
-
+# These are the colors used in generating the graph in Chart.js
 COLORS = [[166, 206, 227], [43, 128, 184], [150, 203, 145], [81, 175, 66], [184, 156, 116],\
           [237, 80, 81], [240, 112, 71], [253, 163, 63], [237, 144, 71], [174, 144, 197],\
           [134, 97, 153]]
@@ -154,7 +155,8 @@ def analyseRouteQ(reslist):
             startShift = route['legs'][0]['duration'] # unit is [s]
         else:
             startShift = 0
-            walkDistance = route['walkDistance'] # unit is [m]
+            
+        walkDistance = route['walkDistance'] # unit is [m]
 
         legs = [x for x in route['legs'] if x['mode'] != 'WALK'] # for calculating legs without walking
         shortis = [x['route']['shortName'] if x['route']['shortName'] else x['mode'] \
@@ -290,10 +292,11 @@ def stopStarts(reply, shortName, headsign):
 
 def styleLegendText(x,times):
     if '+' in x:
-        return '%s, duration: %.0f-%.0f min; median: %.0f min' % \
-               (x, min(times)/60, max(times)/60, st.median(times)/60)
-    else:
-        return '%s, duration: %.0f min' % (x, min(times)/60)
+        if int(min(times)/60) != int(max(times)/60): # if durations differ, give more info
+            return '%s, duration: %.0f-%.0f min; median: %.0f min' % \
+                (x, min(times)/60, max(times)/60, st.median(times)/60)
+    
+    return '%s, duration: %.0f min' % (x, min(times)/60)
 
 
 def makeResults(alltrips):
@@ -340,6 +343,29 @@ def styleChartjs(data, route):
     return {'labels':labels, 'datasets':datasets, 'route':route} 
 
 
+def giveInfo(res, start, end, datte, singles, longer):
+
+    route = '<p>Results from "%s" to "%s" on %s. Routes include walking as follows:'\
+            % (start, end, datte)
+    duration = res['data']['plan']['itineraries'][0]['duration']
+
+
+    # 1.2 refers walking speed of 1.2 m/s
+    walks = [[k,int(v['walkDistance']/1.2/60)] for k,v in singles.items()]
+    walks.extend( [[k,int(v['walkDistance']/1.2/60)] for k,v in longer.items()])
+
+    route += '\n<ul>'
+    for walk in walks:
+        line = '%s: %i mins of walking' % (walk[0], walk[1])
+        route += '<li>' + line + '</li>\n'
+
+    route += '<li>Walking the whole distance would take %s min.</li>\n' % (int(duration/60))
+    route += '</ul>'
+
+    return route
+             
+    
+
 # simple helper function to do the magic
 def tellResults(startcoord, poicoord, weekday=1):
     
@@ -350,18 +376,13 @@ def tellResults(startcoord, poicoord, weekday=1):
     datte = days[weekday] #1 is for Monday
 
     # check for value with highest confidence (confidence, place, coord, coord2)
-
     startlist = sorted(startcoord, key=lambda c: c[0])
     poilist = sorted(poicoord, key=lambda c: c[0])
     start = startlist[-1][2:]
     poi = poilist[-1][2:]
 
-    route = '<p>Results from "%s" to "%s" on %s.</p>' % (startlist[-1][1], poilist[-1][1], datte)
-    pprint.pprint(route[3:-4])
-
     payload = ROUTEQ % (start[0],start[1],poi[0],poi[1],datte,time)
 
-    # (durations,singleroutes,longerroutes)
     result = runQuery(payload)['data']['plan']['itineraries'] 
     (singles,longer) = analyseRouteQ(result)
     
@@ -369,6 +390,12 @@ def tellResults(startcoord, poicoord, weekday=1):
     alltimes.extend([analyseMulti(k,v,weekday) for k,v in longer.items()])
             
     outcome = makeResults(alltimes)
+
+    payload = WALKQ % (start[0],start[1],poi[0],poi[1])
+    res = runQuery(payload)
+    route = giveInfo(res, startlist[-1][1], poilist[-1][1],datte, singles, longer)
+
+    print(route[3:-4])    
     results = styleChartjs(outcome, route)
     
     return results
