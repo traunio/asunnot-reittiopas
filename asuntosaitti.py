@@ -8,7 +8,7 @@ import os
 import traceback
 
 #configuration. Set True for local testing :)
-DEBUG = True
+DEBUG = False
 
 app = Flask(__name__)
 app.config.from_object(__name__)
