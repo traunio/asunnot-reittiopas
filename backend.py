@@ -115,12 +115,8 @@ def getLocation(address):
             coord = i['geometry']['coordinates']
             place = i['properties']['label']
             confidence = i['properties']['confidence']
-            ok_cities = ["Espoo", "Helsinki", "Kauniainen", "Vantaa", "Kirkkonummi"]
-            # print("Debug: %s and coords %s" % (place,coord)) 
-            for city in ok_cities:
-                if city in place:
-                    results.append( (confidence, place, coord[1],coord[0]))
-                    break
+
+            results.append((confidence, place, coord[1], coord[0]))
 
         return results
 

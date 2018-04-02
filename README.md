@@ -16,7 +16,7 @@ Given two addresses the program will check a rough estimate on number of connect
 * How many busses/trains/metro in an hour
 * How long does the connection take.
 
-__The implementation is currently available on [Heroku] (http://asuntosaitti.herokuapp.com/)__. The UI is rough, and no unittests are used in the code (yet). 
+__The implementation is currently available on http://asuntosaitti.herokuapp.com/ (hosted on Heroku). The UI is rough, and no unittests are used in the code. 
 
 Example picture below, although prettier colors than the "production" version.
 ![Example pic on 22.11.2016 version][screenshot]
@@ -31,7 +31,7 @@ After different routes have been established, they are divided into two groups:
 
 The stop schedules are then used to make the chart. For multileg journey the stop schedules for each leg is queried. Then these are matched, meaning that the same combination is required. This skews the results a bit. This affects at least bus leg, where there are multiple busses going the same route (e.g. Länsiväylä). For subway leg it is required that the headsign matches the original subway headsign.
 
-Finally the chart is plotted with [Chart.js!](http://www.chartjs.org/). Chart.js is nice JavaScript charting library. Initially I tried [Chartist.js!](https://gionkunz.github.io/chartist-js/), but I didn't see the possibility to add legends in the basic version. Nevertheless, Chartist.js also seemed to be nice plotting.
+Finally the chart is plotted with [Chart.js](http://www.chartjs.org/). Chart.js is a nice JavaScript charting library. Initially I tried [Chartist.js](https://gionkunz.github.io/chartist-js/), but I didn't see the possibility to add legends in the basic version. Nevertheless, Chartist.js also seemed to be nice for plotting.
 
 ## Miscellaneous notes
 
