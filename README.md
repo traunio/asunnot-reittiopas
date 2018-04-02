@@ -1,4 +1,4 @@
-# Asunnot-reittiopas/Asuntosaitti
+# Vuorotiheys
 
 The goals of this project are:
 * Test [www.digitransit.fi] (https://www.digitransit.fi) API
@@ -31,7 +31,7 @@ After different routes have been established, they are divided into two groups:
 
 The stop schedules are then used to make the chart. For multileg journey the stop schedules for each leg is queried. Then these are matched, meaning that the same combination is required. This skews the results a bit. This affects at least bus leg, where there are multiple busses going the same route (e.g. Länsiväylä). For subway leg it is required that the headsign matches the original subway headsign.
 
-Finally the chart is plotted with [Chart.js] (http://www.chartjs.org/). Chart.js is nice JavaScript charting library. Initially I tried [Chartist.js] (https://gionkunz.github.io/chartist-js/), but I didn't see the possibility to add legends in the basic version. Nevertheless, Chartist.js also seemed to be nice plotting.
+Finally the chart is plotted with [Chart.js!](http://www.chartjs.org/). Chart.js is nice JavaScript charting library. Initially I tried [Chartist.js!](https://gionkunz.github.io/chartist-js/), but I didn't see the possibility to add legends in the basic version. Nevertheless, Chartist.js also seemed to be nice plotting.
 
 ## Miscellaneous notes
 
