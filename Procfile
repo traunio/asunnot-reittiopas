@@ -1,1 +1,0 @@
-web: gunicorn asuntosaitti:app
