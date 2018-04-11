@@ -8,7 +8,7 @@ import os
 import traceback
 
 #configuration. Set True for local testing :)
-DEBUG = True
+DEBUG = False
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -16,6 +16,10 @@ app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 @app.route('/')
 def index():
+    return render_template('index.html')
+
+@app.route('/index.html')
+def hello():
     return render_template('index.html')
 
 @app.route('/data', methods=['POST'])
@@ -67,8 +71,5 @@ def data():
 
 
 if __name__ == '__main__':
-    if DEBUG:
-        app.run()
-    else:
-        port = int(os.environ.get('PORT', 5000))
-        app.run(host='0.0.0.0', port=port)
+    app.run()
+
