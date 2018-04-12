@@ -23,7 +23,7 @@ Example picture below from an old version.
 
 ### Technical side
 
-Technically the implementation relies on querying 11 from journey planner API during Monday/Saturday/Sunday morning. This gives direct routes, i.e. with only one bus/train, and then multileg routes, which might use two busses, bus+train etc. Then the stop schedules for these combinations are queried and results constructed. Since only 11 journey planner results are queried, this also is the upper limit for different transports.
+Technically the implementation relies on querying 9 from journey planner API during Monday/Saturday/Sunday morning. This gives direct routes, i.e. with only one bus/train, and then multileg routes, which might use two busses, bus+train etc. Then the stop schedules for these combinations are queried and results constructed. Since only 9 journey planner results are queried, this also is the upper limit for different transports.
 
 After different routes have been established, they are divided into two groups:
 * Routes with single leg (in addition to walking)
