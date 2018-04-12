@@ -5,6 +5,7 @@ import pprint
 from datetime import date, timedelta
 import statistics as st
 import itertools as it
+import re
 
 #payload, date and time to be included
 #date format: "2016-05-20",
@@ -16,7 +17,7 @@ ROUTEQ = """
        modes: "BUS,TRAM,RAIL,SUBWAY,FERRY,WALK",
        walkReluctance: 2.1, walkBoardCost: 600,
        minTransferTime: 180, walkSpeed: 1.2,
-       numItineraries: 11,
+       numItineraries: 9,
        date: "%s",
        time: "%s"
        ) {
@@ -100,10 +101,20 @@ def runQuery(payload):
     else:
         return None
 
-# Input: address as string
-# Output: (latitude, longitude) or None
-# Gives a latitude longitude pair for a given text address
 def getLocation(address):
+    """ 
+    Input: address as string
+    Output: (latitude, longitude) or None
+    Gives a latitude longitude pair for a given text address
+    """
+
+
+    # check for naughty address
+    match = re.search('["(){}]', address)
+    if match:
+        return None
+    
+    
     payload = "http://api.digitransit.fi/geocoding/v1/search?text=" + \
               urllib.parse.quote(address) # + "&size=1"
     payload = payload + "&focus.point.lat=60.169856&focus.point.lon=24.938379&size=5"
@@ -361,25 +372,61 @@ def giveInfo(res, start, end, datte, singles, longer):
     return route
              
     
+def sort_preferred(places):
 
-# simple helper function to do the magic
+    def get_city(place):
+        parts = place[1].split(',')
+        if len(parts) < 2:
+            return ''
+        return parts[1].strip()
+
+    if len(places) == 1:
+        return (places[-1][2:], places[-1][1])
+        
+    cool_places = ['Espoo', 'Kauniainen', 'Helsinki', 'Vantaa']
+    sorted_places = sorted(places, key=lambda c: c[0])
+
+    if get_city(sorted_places[-1]) in cool_places:
+        return (sorted_places[-1][2:], sorted_places[-1][1])
+
+    # same confidence places
+    candidates = [x for x in places[:-1] if x[0] == sorted_places[-1][0]]
+    if not candidates:
+        return (sorted_places[-1][2:], sorted_places[-1][1])
+
+    better_places = [x for x in candidates if get_city(x) in cool_places]
+
+    if better_places:
+        return (better_places[-1][2:], better_places[-1][1])
+
+    return (sorted_places[-1][2:], sorted_places[-1][1])
+    
+
+
+    
+
 def tellResults(startcoord, poicoord, weekday=1):
+    """
+    Simple helper function to do the magic
+    """
     
     today = date.today()
     days = [today + timedelta(days=x) for x in range(1,8)]
     days = {x.isoweekday():x.strftime("%Y-%m-%d") for x in days}
     time = "07:30:00"
     datte = days[weekday] #1 is for Monday
-
+ 
+    
     # check for value with highest confidence (confidence, place, coord, coord2)
-    startlist = sorted(startcoord, key=lambda c: c[0])
-    poilist = sorted(poicoord, key=lambda c: c[0])
-    start = startlist[-1][2:]
-    poi = poilist[-1][2:]
+    start, startadd = sort_preferred(startcoord)
+    poi, poiadd = sort_preferred(poicoord)
 
     payload = ROUTEQ % (start[0],start[1],poi[0],poi[1],datte,time)
 
-    result = runQuery(payload)['data']['plan']['itineraries'] 
+    result = runQuery(payload)['data']['plan']['itineraries']
+    if not result:
+        return None
+
     (singles,longer) = analyseRouteQ(result)
     
     alltimes = [analyseSingle(k,v,weekday) for k,v in singles.items()]
@@ -388,8 +435,10 @@ def tellResults(startcoord, poicoord, weekday=1):
     outcome = makeResults(alltimes)
 
     payload = WALKQ % (start[0],start[1],poi[0],poi[1])
+
     res = runQuery(payload)
-    route = giveInfo(res, startlist[-1][1], poilist[-1][1],datte, singles, longer)
+    print(res)
+    route = giveInfo(res, startadd, poiadd, datte, singles, longer)
 
     print(route[3:-4])    
     results = styleChartjs(outcome, route)

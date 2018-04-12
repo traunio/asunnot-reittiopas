@@ -12,3 +12,6 @@ __pycache__
 
 # virtual environment
 venv
+
+# log by nohup command
+vuorotiheys.og
