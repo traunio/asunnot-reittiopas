@@ -108,7 +108,6 @@ def getLocation(address):
     Gives a latitude longitude pair for a given text address
     """
 
-
     # check for naughty address
     match = re.search('["(){}]', address)
     if match:
@@ -307,7 +306,9 @@ def styleLegendText(x,times):
 
 
 def makeResults(alltrips):
-    # alltrips = [start,end,duration,walking,name]
+    """
+    alltrips = [start,end,duration,walking,name]
+    """
 
     # we flatten the list of lists
     trips = [item for sublist in alltrips for item in sublist]
@@ -340,8 +341,11 @@ def makeResults(alltrips):
     return zip(startsAll2, durations, colors, cborders)
 
         
-# create dictionary to use with jsonify
+
 def styleChartjs(data, route):
+    """
+    Creates dictionary to use with jsonify
+    """
 
     labels = ['%s-%s' % (x,x+1) for x in range(28)]
     datasets = [{'label':label, 'data':line[0], 'backgroundColor':c, \
