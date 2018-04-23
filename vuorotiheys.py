@@ -28,13 +28,28 @@ def data():
         startloc = request.form['asunto']
         poi = request.form['poi']
         day = request.form['combo']
-        startcoord = backend.getLocation(startloc)
-        poicoord = backend.getLocation(poi)
+        startcoord = backend.get_location(startloc)
+        poicoord = backend.get_location(poi)
+
     except:
         print("Something went wrong")
         print(sys.exc_info()[0])
         traceback.print_exc()
         return jsonify({'error':'Something went wrong in day'})
+
+
+    if len(backend.sort_ok(startcoord)) == 0:
+        return jsonify({'error': 'Starting place address not found'})
+
+    if len(backend.sort_ok(poicoord)) == 0:
+        return jsonify({'error': 'End place address not found'})
+
+    if len(backend.sort_ok(startcoord)) > 1:
+        return jsonify({'error': 'Please specify starting point city'})
+
+    if len(backend.sort_ok(poicoord)) > 1:
+        return jsonify({'error': 'Please specify end place city'})
+    
 
     if day == 'Monday':
         d = 1
@@ -57,7 +72,7 @@ def data():
         return jsonify({'error':"Ups, can't find  location \"%s\"" % poiloc})
 
     try:
-        results = backend.tellResults(startcoord,poicoord, d)
+        results = backend.tell_results(startcoord,poicoord, d)
     except:
         print("Something went wrong")
         print(sys.exc_info()[0])

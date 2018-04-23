@@ -1,11 +1,11 @@
-import requests
-import json
 import urllib
 import pprint
 from datetime import date, timedelta
 import statistics as st
 import itertools as it
 import re
+import requests
+
 
 #payload, date and time to be included
 #date format: "2016-05-20",
@@ -41,8 +41,7 @@ ROUTEQ = """
         }       
     }
   }  
-}"""      
-  
+}"""
 
 # for checking walk duration and distance
 WALKQ = """
@@ -58,7 +57,7 @@ WALKQ = """
       duration      
 <    }
   }  
-}"""  
+}"""
 
 # date in format e.g. "20160929"
 STOPQ = """
@@ -84,11 +83,11 @@ COLORS = [[166, 206, 227], [43, 128, 184], [150, 203, 145], [81, 175, 66], [184,
           [237, 80, 81], [240, 112, 71], [253, 163, 63], [237, 144, 71], [174, 144, 197],\
           [134, 97, 153]]
 
-def runQuery(payload):
+def run_query(payload):
     req = requests.Request('POST', "https://api.digitransit.fi/" \
                            "routing/v1/routers/hsl/index/graphql", data=payload)
     prepped = req.prepare()
-    prepped.headers['Content-Type']='application/graphql'
+    prepped.headers['Content-Type'] = 'application/graphql'
     s = requests.Session()
     resp = s.send(prepped)
 
@@ -101,8 +100,8 @@ def runQuery(payload):
     else:
         return None
 
-def getLocation(address):
-    """ 
+def get_location(address):
+    """
     Input: address as string
     Output: (latitude, longitude) or None
     Gives a latitude longitude pair for a given text address
@@ -112,8 +111,7 @@ def getLocation(address):
     match = re.search('["(){}]', address)
     if match:
         return None
-    
-    
+
     payload = "http://api.digitransit.fi/geocoding/v1/search?text=" + \
               urllib.parse.quote(address) # + "&size=1"
     payload = payload + "&focus.point.lat=60.169856&focus.point.lon=24.938379&size=5"
@@ -134,7 +132,7 @@ def getLocation(address):
         return None
 
 # reverse search mainly for testing purposes
-def getStreetName(coords):
+def get_streetname(coords):
     lat, lon = coords
     lat = str(lat)
     lon = str(lon)
@@ -149,8 +147,8 @@ def getStreetName(coords):
         return None
 
 # input is the results from runRouteQ
-def analyseRouteQ(reslist):        
-    
+def analyse_routeq(reslist):
+
     singleroutes = {}
     longerroutes = {}
     walkDistance = 0
@@ -161,13 +159,13 @@ def analyseRouteQ(reslist):
             startShift = route['legs'][0]['duration'] # unit is [s]
         else:
             startShift = 0
-            
+
         walkDistance = route['walkDistance'] # unit is [m]
 
         legs = [x for x in route['legs'] if x['mode'] != 'WALK'] # for calculating legs without walking
         shortis = [x['route']['shortName'] if x['route']['shortName'] else x['mode'] \
                    + ' (' + x['trip']['tripHeadsign'] + ')' \
-                   for x in route['legs'] if x['route'] != None]       
+                   for x in route['legs'] if x['route'] != None]
 
         if len(legs) < 2 and shortis:
             shortName = shortis[0]
@@ -186,38 +184,38 @@ def analyseRouteQ(reslist):
             except:
                 pprint.pprint(shortis)
                 pprint.pprint(route)
-            if not shortNames in longerroutes.keys():
-                longerroutes[shortNames] = route                    
+            if shortNames not in longerroutes.keys():
+                longerroutes[shortNames] = route
 
-    return (singleroutes,longerroutes)
+    return (singleroutes, longerroutes)
 
 
 # we take a singleroute, and check for stop data
-def analyseSingle(shortName,data,weekday=1):
+def analyse_single(shortName, data, weekday=1):
 
     today = date.today()
-    days = [today + timedelta(days=x) for x in range(1,8)]
-    days = {x.isoweekday():x.strftime("%Y%m%d") for x in days}  
+    days = [today + timedelta(days=x) for x in range(1, 8)]
+    days = {x.isoweekday():x.strftime("%Y%m%d") for x in days}
 
     gtfsId = data['gtfsId']
 
     payload = STOPQ % (gtfsId, days[weekday]) # 1 = monday
-    temp = runQuery(payload)
+    temp = run_query(payload)
 
     results = temp['data']['stop']['stoptimesForServiceDate']
 
     starts = next(x['stoptimes'] for x in results if \
-                  x['pattern']['route']['shortName']==shortName)
+                  x['pattern']['route']['shortName'] == shortName)
     starts2 = [x['scheduledDeparture']-data['startShift'] for x in starts]
 
-    return [(start,start+data['duration'],data['duration'], \
-             data['walkDistance'],shortName) for start in starts2]
+    return [(start, start+data['duration'], data['duration'], \
+             data['walkDistance'], shortName) for start in starts2]
 
 # combine multi legged route into one
-def analyseMulti(name, legs,weekday=1):
+def analyse_multi(name, legs, weekday=1):
     today = date.today()
-    days = [today + timedelta(days=x) for x in range(1,8)]
-    days = {x.isoweekday():x.strftime("%Y%m%d") for x in days}  
+    days = [today + timedelta(days=x) for x in range(1, 8)]
+    days = {x.isoweekday():x.strftime("%Y%m%d") for x in days}
 
     datte = days[weekday]
 
@@ -233,11 +231,11 @@ def analyseMulti(name, legs,weekday=1):
 
     dures = [x['duration'] for x in legs]
     stopids = [x['from']['stop']['gtfsId'] if x['from']['stop'] else None for x in legs]
-    stops3 = zip(stops2,it.count(0))
+    stops3 = zip(stops2, it.count(0))
 
-    tripleinfo = lambda x,y: (x, sum(dures[:stopids.index(x[0])]), \
+    tripleinfo = lambda x, y: (x, sum(dures[:stopids.index(x[0])]), \
                               sum(dures[:stopids.index(x[0])+1]) + y*180)
-    triple = [tripleinfo(x,y) for x,y in stops3]
+    triple = [tripleinfo(x, y) for x, y in stops3]
 
     if legs[-1]['mode'] == 'WALK':
         endwalk = legs[-1]['duration']
@@ -251,19 +249,19 @@ def analyseMulti(name, legs,weekday=1):
     firststop = triple[0]
 
     payload = STOPQ % (firststop[0][0], datte)
-    reply = runQuery(payload)['data']['stop']['stoptimesForServiceDate'] 
+    reply = run_query(payload)['data']['stop']['stoptimesForServiceDate']
 
     # check for start times
-    starts = stopStarts(reply, firststop[0][1], firststop[0][2])
+    starts = stop_starts(reply, firststop[0][1], firststop[0][2])
     ends = [x + firststop[2]- firststop[1] for x in starts]
 
     # loop over possible stops
-    for stop,a,b in triple[1:]:
+    for stop, a, b in triple[1:]:
         payload = STOPQ % (stop[0], datte)
-        reply = runQuery(payload)['data']['stop']['stoptimesForServiceDate'] 
-        schedules = stopStarts(reply, stop[1], stop[2])
+        reply = run_query(payload)['data']['stop']['stoptimesForServiceDate']
+        schedules = stop_starts(reply, stop[1], stop[2])
 
-        if(len(schedules) == 0):
+        if not schedules:
 
             # for debugging. Like a pro!
             pprint.pprint(stop[1])
@@ -278,34 +276,34 @@ def analyseMulti(name, legs,weekday=1):
     starts = [x - startshift for x in starts]
     ends = [x + endwalk for x in ends]
 
-    return [(a,b,b-a, 0,name) for a,b in zip(starts,ends)]
+    return [(a, b, b-a, 0, name) for a, b in zip(starts, ends)]
 
 
-def stopStarts(reply, shortName, headsign):
+def stop_starts(reply, shortName, headsign):
     starts = []
     for route in reply:
-        mode = route['pattern']['route']['mode'] 
+        mode = route['pattern']['route']['mode']
         if mode == 'TRAM' or mode == 'SUBWAY':
             if route['pattern']['headsign'] == headsign:
                 starts.extend(route['stoptimes'])
-        else:            
-            if route['pattern']['route']['shortName']== shortName:
+        else:
+            if route['pattern']['route']['shortName'] == shortName:
                 starts.extend(route['stoptimes'])
 
     starts = [x['scheduledDeparture'] for x in starts]
     starts.sort() # we sort scheduled departures, because they might not be inorder
     return starts
 
-def styleLegendText(x,times):
+def style_legend_text(x, times):
     if '+' in x:
         if int(min(times)/60) != int(max(times)/60): # if durations differ, give more info
             return '%s, duration: %.0f-%.0f min; median: %.0f min' % \
                 (x, min(times)/60, max(times)/60, st.median(times)/60)
-    
+
     return '%s, duration: %.0f min' % (x, min(times)/60)
 
 
-def makeResults(alltrips):
+def make_results(alltrips):
     """
     alltrips = [start,end,duration,walking,name]
     """
@@ -315,20 +313,20 @@ def makeResults(alltrips):
 
     # next we filter non-optimal routes out
     betterExists = lambda x: True if next((y for y in trips \
-                                           if x[0] < y[0] and y[1] <= x[1]),None) else False
+                                           if x[0] < y[0] and y[1] <= x[1]), None) else False
 
     filteredlist = [x for x in trips if not betterExists(x)]
 
     # unique names
-    names = list(set(item[-1] for item in filteredlist))        
+    names = list(set(item[-1] for item in filteredlist))
     names.sort()
 
     # we recreate list of lists for plotting purposes
-    startsAll = [([int(item[0]/3600) for item in filteredlist if item[4]==x],x) for x in names]
-    startsAll2 = [([y[0].count(x) for x in range(28)],y[1]) for y in startsAll]
+    startsAll = [([int(item[0]/3600) for item in filteredlist if item[4] == x], x) for x in names]
+    startsAll2 = [([y[0].count(x) for x in range(28)], y[1]) for y in startsAll]
 
-    durations = [(x,[item[2] for item in filteredlist if item[4]==x]) for x in names]
-    durations = [styleLegendText(x,times) for x,times in durations]
+    durations = [(x, [item[2] for item in filteredlist if item[4] == x]) for x in names]
+    durations = [style_legend_text(x, times) for x, times in durations]
 
     colors = []
     cborders = []
@@ -340,21 +338,18 @@ def makeResults(alltrips):
 
     return zip(startsAll2, durations, colors, cborders)
 
-        
-
-def styleChartjs(data, route):
+def style_chart_js(data, route):
     """
     Creates dictionary to use with jsonify
     """
 
-    labels = ['%s-%s' % (x,x+1) for x in range(28)]
+    labels = ['%s-%s' % (x, x+1) for x in range(28)]
     datasets = [{'label':label, 'data':line[0], 'backgroundColor':c, \
-                 'borderColor':b, 'borderWidth':1} for line,label,c,b in data]
+                 'borderColor':b, 'borderWidth':1} for line, label, c, b in data]
 
-    return {'labels':labels, 'datasets':datasets, 'route':route} 
+    return {'labels':labels, 'datasets':datasets, 'route':route}
 
-
-def giveInfo(res, start, end, datte, singles, longer):
+def give_info(res, start, end, datte, singles, longer):
 
     route = '<p>Results from "%s" to "%s" on %s. Routes include walking as follows:'\
             % (start, end, datte)
@@ -362,8 +357,8 @@ def giveInfo(res, start, end, datte, singles, longer):
 
 
     # 1.2 refers walking speed of 1.2 m/s
-    walks = [[k,int(v['walkDistance']/1.2/60)] for k,v in singles.items()]
-    walks.extend( [[k,int(v['walkDistance']/1.2/60)] for k,v in longer.items()])
+    walks = [[k, int(v['walkDistance']/1.2/60)] for k, v in singles.items()]
+    walks.extend([[k, int(v['walkDistance']/1.2/60)] for k, v in longer.items()])
 
     route += '\n<ul>'
     for walk in walks:
@@ -374,8 +369,47 @@ def giveInfo(res, start, end, datte, singles, longer):
     route += '</ul>'
 
     return route
-             
-    
+
+
+def sort_ok(places):
+    """
+    Input: Whatever the get_location function returns
+    Output: [(coordinate, city)]. Could return an empty list, a list with a single tuple, or
+    many tuples
+    The function check results of get_location function and return either a single address,
+    in case only one address had 1 as a score. If there are many, return many :)
+    """
+
+    def get_city(place):
+        """Helper function to take city name from a tuple from get_location"""
+        parts = place[1].split(',')
+        if len(parts) < 2:
+            return ''
+        return parts[1].strip()
+
+    ok_places = ['Espoo', 'Kauniainen', 'Helsinki', 'Vantaa', 'Kirkkonummi',\
+                 'Tuusula', 'Kerava', 'Sipoo', 'Järvenpää']
+
+    possible = [x for x in places if get_city(x) in ok_places]
+
+    if not possible:
+        return []
+
+    sorted_possible = sorted(possible, key=lambda c: c[0])
+
+    # confidence over 1 and many places
+    candidates = [x for x in possible if x[0] == 1]
+
+    if len(candidates) == 1:
+        return [(candidates[-1][2:], candidates[-1][1])]
+    elif len(candidates) > 1:
+        results = [(item[2:], item[1]) for item in candidates]
+        return results
+
+    # we return all possible
+    results = [(item[2:], item[1])  for item in sorted_possible]
+    return results
+
 def sort_preferred(places):
 
     def get_city(place):
@@ -386,8 +420,9 @@ def sort_preferred(places):
 
     if len(places) == 1:
         return (places[-1][2:], places[-1][1])
-        
-    cool_places = ['Espoo', 'Kauniainen', 'Helsinki', 'Vantaa']
+
+    cool_places = ['Espoo', 'Kauniainen', 'Helsinki', 'Vantaa', 'Kirkkonummi',\
+                   'Tuusula', 'Kerava', 'Sipoo', 'Järvenpää']
     sorted_places = sorted(places, key=lambda c: c[0])
 
     if get_city(sorted_places[-1]) in cool_places:
@@ -404,47 +439,45 @@ def sort_preferred(places):
         return (better_places[-1][2:], better_places[-1][1])
 
     return (sorted_places[-1][2:], sorted_places[-1][1])
-    
 
 
-    
-
-def tellResults(startcoord, poicoord, weekday=1):
+def tell_results(startcoord, poicoord, weekday=1):
     """
     Simple helper function to do the magic
     """
-    
     today = date.today()
-    days = [today + timedelta(days=x) for x in range(1,8)]
+    days = [today + timedelta(days=x) for x in range(1, 8)]
     days = {x.isoweekday():x.strftime("%Y-%m-%d") for x in days}
     time = "07:30:00"
     datte = days[weekday] #1 is for Monday
- 
-    
-    # check for value with highest confidence (confidence, place, coord, coord2)
-    start, startadd = sort_preferred(startcoord)
-    poi, poiadd = sort_preferred(poicoord)
 
-    payload = ROUTEQ % (start[0],start[1],poi[0],poi[1],datte,time)
+    starts = sort_ok(startcoord)
+    pois = sort_ok(poicoord)
+    if not starts or not pois:
+        return {'error':'No address found'}
 
-    result = runQuery(payload)['data']['plan']['itineraries']
+    # even if there are multiple choices, we just take the best
+    start, startadd = starts[-1]
+    poi, poiadd = pois[-1]
+
+    payload = ROUTEQ % (start[0], start[1], poi[0], poi[1], datte, time)
+
+    result = run_query(payload)['data']['plan']['itineraries']
     if not result:
         return None
 
-    (singles,longer) = analyseRouteQ(result)
-    
-    alltimes = [analyseSingle(k,v,weekday) for k,v in singles.items()]
-    alltimes.extend([analyseMulti(k,v,weekday) for k,v in longer.items()])
-            
-    outcome = makeResults(alltimes)
+    (singles, longer) = analyse_routeq(result)
 
-    payload = WALKQ % (start[0],start[1],poi[0],poi[1])
+    alltimes = [analyse_single(k, v, weekday) for k, v in singles.items()]
+    alltimes.extend([analyse_multi(k, v, weekday) for k, v in longer.items()])
+    outcome = make_results(alltimes)
 
-    res = runQuery(payload)
+    payload = WALKQ % (start[0], start[1], poi[0], poi[1])
+    res = run_query(payload)
     print(res)
-    route = giveInfo(res, startadd, poiadd, datte, singles, longer)
+    route = give_info(res, startadd, poiadd, datte, singles, longer)
 
-    print(route[3:-4])    
-    results = styleChartjs(outcome, route)
-    
+    print(route[3:-4])
+    results = style_chart_js(outcome, route)
+
     return results

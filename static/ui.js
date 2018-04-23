@@ -37,9 +37,8 @@
 		 $("#myChart").hide();
 		 alert(data.error);
 	     } 
-	     else {		       		   
+	     else {
 		 $("#myChart").show();
-
 		 $("#route").html(data.route);
 		 
 		 myChart.data.datasets = data.datasets;
