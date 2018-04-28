@@ -1,18 +1,30 @@
 {% extends "layout.html" %}
 {% block body %}
-<dl>
-    <dt>Address of new flat:
-        <dd><input type="text" name="asunto" id="asunto">
-            <dt>Find connections to following location:
-		<dd><input type="text" name="poi" id="poi">
-		    <dd><input type="button" id="button" value="Give connections"> on
-			<select id="combobox">
-			    <option value="Monday">Monday</option>
-			    <option value="Wednesday">Wednesday</option>
-			    <option value="Saturday">Saturday</option>
-			    <option value="Sunday">Sunday</option>
-			</select>
-</dl>
+<form>
+  <div class="row">
+    <p>
+  <label> From</label>
+    <input type="text" name="asunto" id="asunto">
+    </p>
+  </div>
+  <div class="row">
+    <p>
+    <label> To</label>
+      <input type="text" name="poi" id="poi">
+    </p>
+  </div>
+  <div class="row">
+    <p>
+	    <input type="button" id="button" value="Give connections"> on
+	    <select id="combobox">
+	      <option value="Monday">Monday</option>
+	      <option value="Wednesday">Wednesday</option>
+	      <option value="Saturday">Saturday</option>
+	      <option value="Sunday">Sunday</option>
+	    </select>
+    </p>
+  </div>
+</form>	 
 <div id="loading">
     <p>Please wait, loading connections <img src="{{ url_for('static', filename='ajax-loader.gif') }}" /></p>
 </div>
