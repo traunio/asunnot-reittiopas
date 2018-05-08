@@ -12,14 +12,14 @@
 		     stacked: true,
 		     scaleLabel: {
 			 display: true,
-			 labelString: 'Time of day'}
+			 labelString: 'Kellonaika'}
 		 }],
 		 yAxes: [{
 		     stacked: true,
 		     ticks: { beginAtZero:true   },
 		     scaleLabel: {
 			 display: true,
-			 labelString: 'Number of departures per hour' }
+			 labelString: 'Lähtöjen määrä per tunti' }
 		 }]
 	     }
 	 }

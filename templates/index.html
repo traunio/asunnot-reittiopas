@@ -1,41 +1,50 @@
 {% extends "layout.html" %}
 {% block body %}
+<div class="jumbotron text-center">
+  <h1>Vuorotiheys</h1>
+  <p> Reittiliikenteen yhteyksien lukumäärä vuorokauden eri aikoina
+  </p>
+</div>
+
+<div class="container">
 <form>
-  <p>
-    <div class="row">
-      <label> From</label>
-      <div class="myDropDown">
-      <input type="text" name="asunto" id="asunto" placeholder="Address">
+  <div class="form-group">
+    <label for="asunto">Lähtöpaikka:</label>
+    <div class="myDropDown">      
+	<input type="text" class="form-control" name="asunto" id="asunto" placeholder="Osoite">
 	<ul id="fromList"></ul>
-      </div>
     </div>
-  </p>
-  <p>
-    <div class="row">
-      <label> To</label>
+  </div>
+
+  <div class="form-group">
+    <label for="poi">Määränpää:</label>
       <div class="myDropDown">
-      <input type="text" name="poi" id="poi" placeholder="Address">
-      <ul id="toList"></ul>
+	<input type="text" class="form-control" name="poi" id="poi" placeholder="Osoite">
+	<ul id="toList"></ul>
       </div>
     </div>
-  </p>
-  <p>
-    <div class="row">
-      <input type="button" id="button" value="Give connections"> on
-      <select id="combobox">
-	<option value="Monday">Monday</option>
-	<option value="Wednesday">Wednesday</option>
-	<option value="Saturday">Saturday</option>
-	<option value="Sunday">Sunday</option>
+
+  <div class="form-group">
+    <label for="combobox">Ajankohta:</label>
+
+      <select id="combobox" class="form-control">
+	<option value="Monday">Maanantaina</option>
+	<option value="Wednesday">Keskiviikkona</option>
+	<option value="Saturday">Lauantaina</option>
+	<option value="Sunday">Sunnuntaina</option>
       </select>
-    </div>
-  </p>
+  </div>
+
+        <input type="button" id="button" class="btn btn-default" value="Hae yhteydet"> 
+
 </form>
+
 <div id="infotxt"></div>
 <div id="loading">
-  <p>Please wait, loading connections <img src="{{ url_for('static', filename='ajax-loader.gif') }}" /></p>
+  <p>Ladataan tuloksia <img src="{{ url_for('static', filename='ajax-loader.gif') }}" /></p>
 </div>
 <canvas id="myChart" height="200px"></canvas>
 <div id="route"></div>
+</div>
 <script src="{{url_for('static', filename = 'ui.js')}}"></script>
     {% endblock %}

@@ -297,10 +297,10 @@ def stop_starts(reply, shortName, headsign):
 def style_legend_text(x, times):
     if '+' in x:
         if int(min(times)/60) != int(max(times)/60): # if durations differ, give more info
-            return '%s, duration: %.0f-%.0f min; median: %.0f min' % \
+            return '%s, kesto: %.0f-%.0f min; mediaani: %.0f min' % \
                 (x, min(times)/60, max(times)/60, st.median(times)/60)
 
-    return '%s, duration: %.0f min' % (x, min(times)/60)
+    return '%s, kesto: %.0f min' % (x, min(times)/60)
 
 
 def make_results(alltrips):
@@ -351,7 +351,7 @@ def style_chart_js(data, route):
 
 def give_info(res, start, end, datte, singles, longer):
 
-    route = '<p>Results from "%s" to "%s" on %s. Routes include walking as follows:'\
+    route = '<p>Tulokset osoitteesta "%s" osoitteeseen "%s" päivämääränä %s. Reitti sisältää seuraavasti kävelyä:'\
             % (start, end, datte)
     duration = res['data']['plan']['itineraries'][0]['duration']
 
@@ -362,10 +362,10 @@ def give_info(res, start, end, datte, singles, longer):
 
     route += '\n<ul>'
     for walk in walks:
-        line = '%s: %i mins of walking' % (walk[0], walk[1])
+        line = '%s: kävelyä %i minuuttia' % (walk[0], walk[1])
         route += '<li>' + line + '</li>\n'
 
-    route += '<li>Walking the whole distance would take %s min.</li>\n' % (int(duration/60))
+    route += '<li>Koko matkan kävely kestäisi %s minuuttia.</li>\n' % (int(duration/60))
     route += '</ul>'
 
     return route
@@ -424,7 +424,7 @@ def tell_results(startcoord, poicoord, weekday=1):
     starts = sort_ok(startcoord)
     pois = sort_ok(poicoord)
     if not starts or not pois:
-        return {'error':'No address found'}
+        return {'error':'Osoitetta ei löytynyt'}
 
     # even if there are multiple choices, we just take the best
     start, startadd = starts[-1]
@@ -444,10 +444,8 @@ def tell_results(startcoord, poicoord, weekday=1):
 
     payload = WALKQ % (start[0], start[1], poi[0], poi[1])
     res = run_query(payload)
-    print(res)
     route = give_info(res, startadd, poiadd, datte, singles, longer)
 
-    print(route[3:-4])
     results = style_chart_js(outcome, route)
 
     return results
