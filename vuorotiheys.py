@@ -37,20 +37,21 @@ def data():
         traceback.print_exc()
         return jsonify({'error':'Something went wrong in day'})
 
+    start = [address[1] for address in backend.sort_ok(startcoord)]
+    end = [address[1] for address in backend.sort_ok(poicoord)]
 
-    if len(backend.sort_ok(startcoord)) == 0:
-        return jsonify({'error': 'Starting place address not found'})
+    if len(start) == 0:
+        return jsonify({'noasunto': 'Starting place address not found'})
 
-    if len(backend.sort_ok(poicoord)) == 0:
-        return jsonify({'error': 'End place address not found'})
+    if len(end) == 0:
+        return jsonify({'nopois': 'End place address not found'})
 
-    if len(backend.sort_ok(startcoord)) > 1:
-        return jsonify({'error': 'Please specify starting point city'})
+    if len(start) > 1:
+        return jsonify({'asuntos': start})
 
-    if len(backend.sort_ok(poicoord)) > 1:
-        return jsonify({'error': 'Please specify end place city'})
+    if len(end) > 1:
+        return jsonify({'pois': end})
     
-
     if day == 'Monday':
         d = 1
     elif day == 'Wednesday':

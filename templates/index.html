@@ -1,32 +1,39 @@
 {% extends "layout.html" %}
 {% block body %}
 <form>
-  <div class="row">
-    <p>
-  <label> From</label>
-    <input type="text" name="asunto" id="asunto">
-    </p>
-  </div>
-  <div class="row">
-    <p>
-    <label> To</label>
-      <input type="text" name="poi" id="poi">
-    </p>
-  </div>
-  <div class="row">
-    <p>
-	    <input type="button" id="button" value="Give connections"> on
-	    <select id="combobox">
-	      <option value="Monday">Monday</option>
-	      <option value="Wednesday">Wednesday</option>
-	      <option value="Saturday">Saturday</option>
-	      <option value="Sunday">Sunday</option>
-	    </select>
-    </p>
-  </div>
-</form>	 
+  <p>
+    <div class="row">
+      <label> From</label>
+      <div class="myDropDown">
+      <input type="text" name="asunto" id="asunto" placeholder="Address">
+	<ul id="fromList"></ul>
+      </div>
+    </div>
+  </p>
+  <p>
+    <div class="row">
+      <label> To</label>
+      <div class="myDropDown">
+      <input type="text" name="poi" id="poi" placeholder="Address">
+      <ul id="toList"></ul>
+      </div>
+    </div>
+  </p>
+  <p>
+    <div class="row">
+      <input type="button" id="button" value="Give connections"> on
+      <select id="combobox">
+	<option value="Monday">Monday</option>
+	<option value="Wednesday">Wednesday</option>
+	<option value="Saturday">Saturday</option>
+	<option value="Sunday">Sunday</option>
+      </select>
+    </div>
+  </p>
+</form>
+<div id="infotxt"></div>
 <div id="loading">
-    <p>Please wait, loading connections <img src="{{ url_for('static', filename='ajax-loader.gif') }}" /></p>
+  <p>Please wait, loading connections <img src="{{ url_for('static', filename='ajax-loader.gif') }}" /></p>
 </div>
 <canvas id="myChart" height="200px"></canvas>
 <div id="route"></div>
