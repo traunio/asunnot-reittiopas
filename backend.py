@@ -390,7 +390,7 @@ def sort_ok(places):
     ok_places = ['Espoo', 'Kauniainen', 'Helsinki', 'Vantaa', 'Kirkkonummi',\
                  'Tuusula', 'Kerava', 'Sipoo', 'Järvenpää']
 
-    possible = [x for x in places if get_city(x) in ok_places]
+    possible = [x for x in places if get_city(x) in ok_places and x[0]> 0.4]
 
     if not possible:
         return []
@@ -409,36 +409,6 @@ def sort_ok(places):
     # we return all possible
     results = [(item[2:], item[1])  for item in sorted_possible]
     return results
-
-def sort_preferred(places):
-
-    def get_city(place):
-        parts = place[1].split(',')
-        if len(parts) < 2:
-            return ''
-        return parts[1].strip()
-
-    if len(places) == 1:
-        return (places[-1][2:], places[-1][1])
-
-    cool_places = ['Espoo', 'Kauniainen', 'Helsinki', 'Vantaa', 'Kirkkonummi',\
-                   'Tuusula', 'Kerava', 'Sipoo', 'Järvenpää']
-    sorted_places = sorted(places, key=lambda c: c[0])
-
-    if get_city(sorted_places[-1]) in cool_places:
-        return (sorted_places[-1][2:], sorted_places[-1][1])
-
-    # same confidence places
-    candidates = [x for x in places[:-1] if x[0] == sorted_places[-1][0]]
-    if not candidates:
-        return (sorted_places[-1][2:], sorted_places[-1][1])
-
-    better_places = [x for x in candidates if get_city(x) in cool_places]
-
-    if better_places:
-        return (better_places[-1][2:], better_places[-1][1])
-
-    return (sorted_places[-1][2:], sorted_places[-1][1])
 
 
 def tell_results(startcoord, poicoord, weekday=1):
