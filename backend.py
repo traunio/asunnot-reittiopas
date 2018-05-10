@@ -351,8 +351,8 @@ def style_chart_js(data, route):
 
 def give_info(res, start, end, datte, singles, longer):
 
-    route = '<p>Tulokset osoitteesta "%s" osoitteeseen "%s" päivämääränä %s. Reitti sisältää seuraavasti kävelyä:'\
-            % (start, end, datte)
+    route = '<p>Tulokset osoitteesta "%s" osoitteeseen "%s" päivämääränä %s. ' \
+            'Reitti sisältää seuraavasti kävelyä:' % (start, end, datte)
     duration = res['data']['plan']['itineraries'][0]['duration']
 
 
@@ -362,7 +362,7 @@ def give_info(res, start, end, datte, singles, longer):
 
     route += '\n<ul>'
     for walk in walks:
-        line = '%s: kävelyä %i minuuttia' % (walk[0], walk[1])
+        line = '%s: kävelyä %i min' % (walk[0], walk[1])
         route += '<li>' + line + '</li>\n'
 
     route += '<li>Koko matkan kävely kestäisi %s minuuttia.</li>\n' % (int(duration/60))
