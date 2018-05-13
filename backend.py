@@ -360,12 +360,12 @@ def give_info(res, start, end, datte, singles, longer):
     walks = [[k, int(v['walkDistance']/1.2/60)] for k, v in singles.items()]
     walks.extend([[k, int(v['walkDistance']/1.2/60)] for k, v in longer.items()])
 
-    route += '\n<ul>'
+    route += '\n<ul class="list-group">\n'
     for walk in walks:
         line = '%s: kävelyä %i min' % (walk[0], walk[1])
-        route += '<li>' + line + '</li>\n'
+        route += '<li class="list-group-item">' + line + '</li>\n'
 
-    route += '<li>Koko matkan kävely kestäisi %s minuuttia.</li>\n' % (int(duration/60))
+    route += '<li class="list-group-item">Koko matkan kävely kestäisi %s minuuttia.</li>\n' % (int(duration/60))
     route += '</ul>'
 
     return route
