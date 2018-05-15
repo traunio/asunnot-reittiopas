@@ -25,7 +25,7 @@
 	 }
      });
 
-     document.querySelector("#poi").addEventListener("keyup", event => {
+     document.querySelector("#poi").addEventListener("keyup", function(event) {
 	 if(event.key !== "Enter") return; // Use `.key` instead.
 	 document.querySelector("#button").click(); // Things you want to do.
 	 event.preventDefault(); // No need to `return false;`.
