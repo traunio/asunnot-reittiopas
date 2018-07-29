@@ -336,15 +336,25 @@ def make_results(alltrips):
         colors.append('rgba(%i, %i, %i, 0.7)' % (c[0], c[1], c[2]))
         cborders.append('rgba(%i, %i, %i, 0.9)' %  (c[0], c[1], c[2]))
 
-    return zip(startsAll2, durations, colors, cborders)
+    return list(zip(startsAll2, durations, colors, cborders))
 
 def style_chart_js(data, route):
     """
     Creates dictionary to use with jsonify
+    data = [line, label, c ,b], line[0] = [vuorolkm], label = "linja", c ja b värejä 
     """
 
-    labels = ['%s-%s' % (x, x+1) for x in range(28)]
-    datasets = [{'label':label, 'data':line[0], 'backgroundColor':c, \
+    start = 27  # 
+    end = 0
+    for line, label, c, b in data:
+        start = min(start, next(i for i, x in enumerate(line[0]) if x!=0) )
+        i = 27
+        while line[0][i]==0 and i >= end:
+            i-= 1
+        end = max(end, i)
+
+    labels = ['%s-%s' % (x, x+1) for x in range(start,end+1)]
+    datasets = [{'label':label, 'data':line[0][start:end+1], 'backgroundColor':c, \
                  'borderColor':b, 'borderWidth':1} for line, label, c, b in data]
 
     return {'labels':labels, 'datasets':datasets, 'route':route}

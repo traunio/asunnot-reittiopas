@@ -15,11 +15,8 @@ app.config.from_object(__name__)
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 @app.route('/')
-def index():
-    return render_template('index.html')
-
 @app.route('/index.html')
-def hello():
+def index():
     return render_template('index.html')
 
 @app.route('/data', methods=['POST'])
