@@ -1,0 +1,50 @@
+{% extends "vuoro_app/layout.html" %}
+{% block body %}
+<div class="jumbotron text-center">
+  <h1>Vuorotiheys</h1>
+  <p> Pääkaupunkiseudun reittiliikenteen yhteyksien lukumäärä vuorokauden eri aikoina
+  </p>
+</div>
+
+<div class="container">
+<form>
+  <div class="form-group">
+    <label for="asunto">Lähtöpaikka:</label>
+    <div class="myDropDown">      
+	<input type="text" class="form-control" name="asunto" id="asunto" placeholder="Osoite">
+	<ul id="fromList"></ul>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="poi">Määränpää:</label>
+      <div class="myDropDown">
+	<input type="text" class="form-control" name="poi" id="poi" placeholder="Osoite">
+	<ul id="toList"></ul>
+      </div>
+    </div>
+
+  <div class="form-group">
+    <label for="combobox">Ajankohta:</label>
+
+      <select id="combobox" class="form-control">
+	<option value="Monday">Maanantaina</option>
+	<option value="Wednesday">Keskiviikkona</option>
+	<option value="Saturday">Lauantaina</option>
+	<option value="Sunday">Sunnuntaina</option>
+      </select>
+  </div>
+
+        <input type="button" id="button" class="btn btn-default" value="Hae yhteydet"> 
+
+</form>
+
+<div id="infotxt"></div>
+<div id="loading">
+  <p>Ladataan tuloksia <img src="{{url_for('.static', filename='ajax-loader.gif') }}" /></p>
+</div>
+<canvas id="myChart" height="200px"></canvas>
+<div id="route"></div>
+</div>
+<script src="{{url_for('.static', filename = 'vuorotiheys_ui.js')}}"></script>
+    {% endblock %}
