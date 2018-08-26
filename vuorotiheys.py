@@ -1,7 +1,7 @@
 from flask import Flask, request, session, g, redirect, url_for, \
-    abort, render_template, flash, jsonify
+    abort, render_template, flash, jsonify, Blueprint
 
-import backend
+from . import backend
 import sys
 import os
 
@@ -10,16 +10,17 @@ import traceback
 #configuration. Set True for local testing :)
 DEBUG = False
 
-app = Flask(__name__)
-app.config.from_object(__name__)
-app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
-@app.route('/')
-@app.route('/index.html')
+vuorotiheys = Blueprint('vuorotiheys', __name__, template_folder='templates',
+                         static_folder='static/vuoro_app')
+
+
+@vuorotiheys.route('/')
+@vuorotiheys.route('/index.html')
 def index():
-    return render_template('index.html')
+    return render_template('vuoro_app/index.html')
 
-@app.route('/data', methods=['POST'])
+@vuorotiheys.route('/data', methods=['POST'])
 def data():
     try:
         startloc = request.form['asunto']
